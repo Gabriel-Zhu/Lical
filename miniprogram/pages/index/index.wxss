@@ -1,0 +1,88 @@
+page {
+  background: #f6f6f6;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.page-index {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.module-welcome {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 60%;
+}
+
+.userinfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.userinfo-avatar {
+  border-radius: 64px;
+  width: 64px;
+  height: 64px;
+}
+
+.userinfo-nickname {
+  margin-top: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #888;
+}
+
+.userform-input {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+.userform-submit {
+  margin-top: 8px;
+  line-height: 40px;
+}
+
+.module-authorize {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.appinfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.appinfo-logo {
+  border-radius: 64px;
+  width: 64px;
+  height: 64px;
+  background-size: contain;
+}
+
+.appinfo-name {
+  margin-top: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #888;
+}
+
+.button-authorize {
+  margin-top: 16px;
+  line-height: 40px;
+}
