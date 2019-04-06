@@ -3,6 +3,9 @@ const app = getApp()
 
 Page({
   data: {
+    isAuthorizing: true,
+    isLogging: true,
+    isCreating: false,
     logoUrl: './logo.jpeg',
     authorized: false,
     userInfo: {},
@@ -20,23 +23,38 @@ Page({
       return
     }
 
-    // 获取用户信息
+    wx.showShareMenu()
+
     wx.getSetting({
       success: res => {
         if (res.authSetting['scope.userInfo']) {
           wx.getUserInfo({
             success: res => {
               this.setData({
+                isAuthorizing: false,
                 authorized: true,
                 userInfo: res.userInfo,
               })
 
               this.onGetOpenid()
-            }
+            },
+            fail: () => {
+              this.setData({
+                isAuthorizing: false,
+              })
+            },
+          })
+        } else {
+          this.setData({
+            isAuthorizing: false,
           })
         }
       }
     })
+  },
+
+  onNavigateToHome: function() {
+    wx.switchTab({ url: '/pages/home/home' })
   },
 
   onIdInput: function(e) {
@@ -48,7 +66,7 @@ Page({
   onAddLicalUser: function() {
     const db = wx.cloud.database()
 
-    if (!/^[0-9a-zA-Z_]{1,}$/.test(this.data.licalIdInput)) {
+    if (!/^[0-9a-zA-Z_]{1, 14}$/.test(this.data.licalIdInput)) {
       wx.showToast({
         icon: 'none',
         title: 'Input format error!',
@@ -57,7 +75,7 @@ Page({
     }
 
     if (this.data.logged) {
-      wx.navigateTo({ url: '/pages/home/home' })
+      wx.switchTab({ url: '/pages/home/home' })
       return
     }
 
@@ -75,13 +93,12 @@ Page({
 
         this.setData({ logged: true })
 
-        wx.navigateTo({ url: '/pages/home/home' })
+        this.onNavigateToHome()
       },
       fail: error => {
         console.log(error)
       }
-    })
-    
+    })  
   },
 
   onGetLicalUser: function () {
@@ -89,23 +106,33 @@ Page({
     db.collection('users').where(db.command.or({
       _openid: app.globalData.openid,
     }, {
-        lical_id: this.data.licalIdInput,
-      })).get({
-        success: res => {
-          const licalUserInfo = res.data && res.data[0] || {}
+      lical_id: this.data.licalIdInput,
+    })).get({
+      success: res => {
+        const licalUserInfo = res.data && res.data[0] || {}
 
-          if (licalUserInfo._openid === app.globalData.openid) {
-            app.globalData.licalUserInfo = licalUserInfo
+        if (licalUserInfo._openid === app.globalData.openid) {
+          app.globalData.licalUserInfo = licalUserInfo
 
-            this.setData({
-              logged: true,
-              licalIdInput: licalUserInfo.lical_id,
-            })
+          this.setData({
+            isLogging: false,
+            logged: true,
+            licalIdInput: licalUserInfo.lical_id,
+          })
 
-            wx.navigateTo({ url: '/pages/home/home' })
-          }
+          this.onNavigateToHome()
+        } else {
+          this.setData({
+            isLogging: false,
+          })
         }
-      })
+      },
+      fail: function() {
+        this.setData({
+          isLogging: false,
+        })
+      },
+    })
   },
 
   onGetUserInfo: function(e) {
@@ -114,7 +141,11 @@ Page({
         authorized: true,
         userInfo: e.detail.userInfo,
       })
+
+      this.onGetOpenid()
     }
+
+    this.setData({ isAuthorizing: false })
   },
 
   onGetOpenid: function() {

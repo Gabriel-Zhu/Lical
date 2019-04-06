@@ -1,0 +1,151 @@
+/* pages/home/home.wxss */
+.page-home {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  height: 100%;
+}
+
+.home-tabs {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #888;
+}
+
+.home-tab {
+  padding: 0 16px;
+  line-height: 16px;
+}
+
+.home-tab.is-active {
+  color: #222;
+}
+
+.home-tab + .home-tab {
+  border-left: 1px solid #222;
+}
+
+.home-module-activities {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.home-date-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.home-date-list + .home-date-list {
+  margin-top: 16px;
+}
+
+.home-activity-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.home-date {
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.home-card {
+  display: flex;
+  padding: 16px;
+  width: 100%;
+  font-size: 14px;
+  box-sizing: border-box;
+  box-shadow:0 1px 16px rgba(0, 0, 0, .1);
+}
+
+.home-card + .home-card {
+  margin-top: 16px;
+}
+
+.home-card-content {
+  display: flex;
+  width: 100%;
+}
+
+.home-card-content-left {
+  display: flex;
+  justify-content: center;
+  width: 64px;
+  box-sizing: border-box;
+}
+
+.home-card-content-left image {
+  display: flex;
+  border-radius: 100%;
+  width: 64px;
+  height: 64px;
+  overflow: hidden;
+}
+
+.home-card-content-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 16px;
+}
+
+.home-activity-header {
+  color: #888;
+}
+
+.home-activity-user {
+  font-weight: bold;
+  color: #222;
+}
+
+.home-activity-content {
+  color: #222;
+}
+
+.home-module-footer {
+  margin-top: 16px;
+  margin-bottom: 32px;
+  border-top: 1px solid #e7e7e7;
+  padding-top: 8px;
+  width: 64px;
+  font-size: 14px;
+  text-align: center;
+  color: #e7e7e7;
+}
+
+.home-button-post {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  border: none;
+  border-radius: 48px;
+  padding-bottom:7px;
+  width: 48px;
+  height: 48px;
+  font-size: 36px;
+}
+
+.home-buttons {
+  position: fixed;
+  bottom: 80px;
+  right: 16px;
+}
+
+.home-button + .home-button {
+  margin-top: 16px;
+}

@@ -2,22 +2,19 @@
 <view class="page-index">
   <view class="module-welcome" wx:if="{{authorized}}">
     <view class="userinfo">
-      <image
-        background-size="cover"
-        class="userinfo-avatar"
-        src="{{userInfo.avatarUrl}}"
-      >
-      </image>
+      <div class="userinfo-avatar">
+        <image src="{{userInfo.avatarUrl}}"></image>
+      </div>
       <text class="userinfo-nickname">{{userInfo.nickName}}</text>
     </view>
     <view class="userform">
       <input
-        wx:if="{{!logged}}"
+        wx:if="{{!isLogging && !logged}}"
         class="userform-input"
         placeholder="Create Your Lical ID"
         bindinput="onIdInput"
       />
-      <text wx:else>Lical ID: {{licalIdInput}}</text>
+      <text wx:elif="{{!isLogging}}">Lical ID: {{licalIdInput}}</text>
       <button
         class="userform-submit"
         type="primary"
@@ -38,6 +35,7 @@
       <text class="appinfo-name">Lical</text>
     </view>
     <button
+      wx:if="{{!isAuthorizing && !authorized}}"
       class="button-authorize"
       type="primary"
       open-type="getUserInfo"

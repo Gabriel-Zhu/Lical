@@ -1,1 +1,77 @@
-<view></view>
+<!--pages/home/home.wxml-->
+<view class="page-home">
+  <div class="home-tabs">
+    <span
+      wx:for="{{ tabs }}"
+      wx:for-item="tab"
+      wx:key="name"
+      class="home-tab {{ tab.isActive ? 'is-active' : '' }}"
+      bindtap="onSwitchTab"
+      data-tab-name="{{ tab.name }}"
+    >
+      {{ tab.name }}
+    </span>
+  </div>
+  <div class="home-module-activities">
+    <div
+      wx:for="{{ activityListMap }}"
+      wx:for-index="date"
+      wx:for-item="activityList"
+      wx:key
+      class="home-date-list"
+    >
+      <div class="home-date">{{ date }}</div>
+      <div class="home-activity-list">
+        <div
+          wx:for="{{ activityList }}"
+          wx:for-item="activity"
+          wx:key="_id"
+          class="home-card"
+        >
+          <div class="home-card-content">
+            <div class="home-card-content-left">
+              <image src="{{ userMap[activity.lical_id].avatarUrl }}"></image>
+            </div>
+            <div class="home-card-content-right">
+              <div class="home-activity-header">
+                <span class="home-activity-user">
+                  {{ userMap[activity.lical_id].nickName }}
+                </span>
+                @{{ activity.lical_id }} · {{ activity.formated_created_at.time }}
+              </div>
+              <div class="home-activity-content">
+                {{ activity.content || activityDefaultContentMap[activity.type] }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="home-module-footer">
+      The end
+    </div>
+  </div>
+  <div wx:if="{{ postButtonsShown }}" class="home-buttons">
+    <button
+      class="home-button"
+      type="primary"
+      bindtap="onSleep"
+    >
+      Go to sleep
+    </button>
+    <button
+      class="home-button"
+      type="primary"
+      bindtap="onGetUp"
+    >
+      Get up
+    </button>
+  </div>
+  <button
+    class="home-button-post"
+    type="primary"
+    bindtap="onButtonsToggle"
+  >
+    +
+  </button>
+</view>
