@@ -1,1 +1,9 @@
-/* pages/discover/discover.wxss */
+.page-discover {
+  display: flex;
+  flex-direction: column;
+}
+
+.page-in-dev {
+  margin-top: 16px;
+  margin-left: 16px;
+}
