@@ -4,16 +4,27 @@
   flex-direction: column;
   align-items: center;
   position: relative;
-  height: 100%;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
 }
 
-.home-tabs {
+.page-header {
   display: flex;
   align-items: center;
-  margin-top: 20px;
+  justify-content: center;
+  position: fixed;
+  padding: 16px 0;
+  width: 100%;
   font-size: 14px;
   font-weight: bold;
   color: #888;
+  background: #fff;
+  z-index: 5;
+}
+
+.page-home.is-scrolling .page-header {
+  box-shadow:0 1px 16px rgba(0, 0, 0, .1);
 }
 
 .home-tab {
@@ -29,8 +40,14 @@
   border-left: 1px solid #222;
 }
 
-.home-module-activities {
+.page-content {
   flex: 1;
+  padding-top: 48px;
+  width: 100%;
+  height: calc(100% - 48px);
+}
+
+.home-module-activities {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -40,13 +57,13 @@
   box-sizing: border-box;
 }
 
-.home-date-list {
+.home-module-activity {
   display: flex;
   flex-direction: column;
   width: 100%;
 }
 
-.home-date-list + .home-date-list {
+.home-module-activity + .home-module-activity {
   margin-top: 16px;
 }
 
@@ -67,6 +84,7 @@
   width: 100%;
   font-size: 14px;
   box-sizing: border-box;
+  background: #fff;
   box-shadow:0 1px 16px rgba(0, 0, 0, .1);
 }
 
@@ -102,6 +120,8 @@
 }
 
 .home-activity-header {
+  display: flex;
+  flex-direction: column;
   color: #888;
 }
 
@@ -110,16 +130,38 @@
   color: #222;
 }
 
+.home-activity-tip {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+}
+
+.home-activity-tip-dot {
+  display: block;
+  margin-top: 2px;
+  margin-right: 6px;
+  border-radius: 4px;
+  width: 4px;
+  height: 4px;
+  background: #888;
+}
+
+.home-activity-tip.danger {
+  color: #cb4042;
+}
+
+.home-activity-tip.danger .home-activity-tip-dot {
+  background: #cb4042;
+}
+
 .home-activity-content {
   color: #222;
 }
 
 .home-module-footer {
-  margin-top: 16px;
+  margin-top: 32px;
   margin-bottom: 32px;
-  border-top: 1px solid #e7e7e7;
   padding-top: 8px;
-  width: 64px;
   font-size: 14px;
   text-align: center;
   color: #e7e7e7;
@@ -146,6 +188,7 @@
   right: 16px;
 }
 
-.home-button + .home-button {
+.home-button {
   margin-top: 16px;
+  font-size: 14px;
 }

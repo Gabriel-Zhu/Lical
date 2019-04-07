@@ -14,13 +14,12 @@
         placeholder="Create Your Lical ID"
         bindinput="onIdInput"
       />
-      <text wx:elif="{{!isLogging}}">Lical ID: {{licalIdInput}}</text>
       <button
         class="userform-submit"
         type="primary"
         bindtap="onAddLicalUser"
       >
-        Enter Lical
+        进入 Lical
       </button>
     </view>
   </view>

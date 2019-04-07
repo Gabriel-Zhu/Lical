@@ -6,27 +6,45 @@ const ACTIVITY_DESC_MAP = {
 }
 
 const ACTIVITY_DEFAULT_CONTENT_MAP = {
-  'sleep': 'Good night! 😴',
-  'get_up': 'Good morning! 🌞',
+  'sleep': '晚安！😴',
+  'get_up': '早安！🌞',
 }
+
+const ACTIVITY_TIP_MAP = {
+  'sleep': {
+    'danger': '晚睡猝死警告',
+  },
+  'get_up': {
+    'danger': '晚起毁一天警告',
+  },
+}
+
+const getInitialActivityListQuery = () => ({
+  skip: 0,
+  limit: 10,
+})
 
 Page({
   data: {
+    pageTimestamp: new Date().getTime(),
+    activityTipMap: ACTIVITY_TIP_MAP,
+    scrollTop: 0,
     tabs: [
       {
-        name: 'Watched',
+        name: '关注',
         isActive: true,
       },
       {
-        name: 'Only Me',
+        name: '我的',
         isActive: false,
       },
     ],
     postButtonsShown: false,
     activityDescMap: ACTIVITY_DESC_MAP,
     activityDefaultContentMap: ACTIVITY_DEFAULT_CONTENT_MAP,
-    activityListMap: {},
+    activityList: [],
     userMap: {},
+    activityListQuery: getInitialActivityListQuery(),
   },
 
   onSwitchTab: function(e) {
@@ -37,24 +55,73 @@ Page({
       })),
     })
 
-    this.onGetActivityList()
+    this.onGetActivityList(true)
   },
 
   onLoad: function () {
-    wx.showShareMenu()
+    if (!wx.cloud) {
+      wx.showToast({
+        icon: 'none',
+        title: '无法连接到网络！',
+      })
+      return
+    }
 
-    this.onGetActivityList()
+    if (
+      !app.globalData.licalUserInfo
+        || !app.globalData.licalUserInfo.lical_id
+    ) {
+      wx.navigateTo({
+        url: '/pages/index/index',
+      })
+    } 
+
+    const timer = setInterval(() => {
+      if (
+        app.globalData.licalUserInfo
+          && app.globalData.licalUserInfo.lical_id
+      ) {
+        wx.showShareMenu()
+
+        this.onGetActivityList(true)
+        clearInterval(timer)
+      }
+       
+    }, 500)
   },
 
   onButtonsToggle: function() {
     this.setData({ postButtonsShown: !this.data.postButtonsShown })
   },
 
-  onGetActivityList: function () {
+  onScrollToTop: function() {
+    this.setData({ scrollTop: 0 })
+  },
+
+  onScrollToBottom: function() {
+    this.onGetActivityList()
+  },
+
+  onScroll: function(e) {
+    this.setData({ scrollTop: e.detail.scrollTop })
+  },
+
+  onGetActivityList: function(isRefresh = false) {
+    if (isRefresh) {
+      this.setData({
+        pageTimestamp: new Date().getTime(),
+        activityList: [],
+        userMap: {},
+        activityListQuery: getInitialActivityListQuery(),
+      })
+    }
+
     const db = wx.cloud.database()
     const _ = db.command
+    const { activityListQuery: { skip, limit } } = this.data
     const filter = {
-      created_at: _.gt(new Date().getTime() - 30 * 24 * 60 * 60 * 1000),
+      created_at: _.gt(new Date().getTime() - 30 * 24 * 60 * 60 * 1000)
+        .and(_.lt(this.data.pageTimestamp)),
     }
 
     if (this.data.tabs[1].isActive) {
@@ -64,36 +131,47 @@ Page({
     db.collection('activities')
       .where(filter)
       .orderBy('created_at', 'desc')
+      .skip(skip)
+      .limit(limit)
       .get({
         success: res => {
-          const activities = res.data
           const userIds = []
-  
-          const activityListMap = {}
+          const newActivities = res.data.map(activity => {
+            const { type, lical_id, created_at } = activity
+            const finalActivity = {
+              ...activity,
+              formated_created_at: this.formatDate(created_at),
+            }
+            const {
+              formated_created_at: { hours },
+            } = finalActivity
 
-          activities.forEach(item => {
-            const activity = {
-              ...item,
-              formated_created_at: this.formatDate(item.created_at),
+            if (type === 'get_up' && hours >= 9 && hours < 12) {
+              finalActivity.tip = {
+                type: 'danger',
+              }
+            } else if (type === 'sleep' && hours >= 0 && hours <= 11) {
+              finalActivity.tip = {
+                type: 'danger',
+              }
             }
 
-            const { date } = activity.formated_created_at
+            userIds.push(lical_id)
 
-            if (activityListMap[date]) {
-              activityListMap[date] = [
-                ...activityListMap[date],
-                activity,
-              ]
-            } else {
-              activityListMap[date] = [activity]
-            }
-
-            userIds.push(activity.lical_id)
+            return finalActivity
           })
 
           this.onGetUserList(userIds)
-
-          this.setData({ activityListMap })
+          this.setData({
+            activityList: [
+              ...this.data.activityList,
+              ...newActivities,
+            ],
+            activityListQuery: {
+              skip: skip + limit,
+              limit,
+            }, 
+          })
         },
       })
   },
@@ -129,13 +207,10 @@ Page({
       success: () => {
         wx.showToast({
           icon: 'success',
-          title: 'Post successfully!',
+          title: '打卡成功！',
         })
 
-        this.onGetActivityList()
-      },
-      fail: error => {
-        console.log(error)
+        this.onGetActivityList(true)
       },
     })
   },
@@ -152,15 +227,21 @@ Page({
     const add0 = m => m < 10 ? '0' + m : m
     //timestamp是整数，否则要parseInt转换
     const time = new Date(timestamp)
-    const y = time.getFullYear()
-    const m = time.getMonth() + 1
-    const d = time.getDate()
-    const h = time.getHours()
-    const mm = time.getMinutes()
-    const s = time.getSeconds()
+    const years = time.getFullYear()
+    const months = time.getMonth() + 1
+    const days = time.getDate()
+    const hours = time.getHours()
+    const minutes = time.getMinutes()
+    const seconds = time.getSeconds()
     return {
-      date: `${y}-${add0(m)}-${add0(d)}`,
-      time: `${add0(h)}:${add0(mm)}`,
+      years,
+      months,
+      days,
+      hours,
+      minutes,
+      seconds,
+      date: `${years}-${add0(months)}-${add0(days)}`,
+      time: `${add0(hours)}:${add0(minutes)}`,
     }
   },
 })

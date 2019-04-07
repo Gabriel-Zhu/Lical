@@ -3,15 +3,15 @@
     "list": [
       {
         "pagePath": "pages/home/home",
-        "text": "HOME"
+        "text": "首页"
       },
       {
         "pagePath": "pages/discover/discover",
-        "text": "DISCOVER"
+        "text": "发现"
       },
       {
         "pagePath": "pages/me/me",
-        "text": "ME"
+        "text": "我"
       }
     ]
   },

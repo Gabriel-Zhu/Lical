@@ -9,7 +9,6 @@ Page({
     logoUrl: './logo.jpeg',
     authorized: false,
     userInfo: {},
-    licalUserInfo: {},
     licalIdInput: '',
     logged: false,
   },
@@ -18,7 +17,7 @@ Page({
     if (!wx.cloud) {
       wx.showToast({
         icon: 'none',
-        title: 'Unable to connect to the network!',
+        title: '无法连接到网络！',
       })
       return
     }
@@ -66,16 +65,17 @@ Page({
   onAddLicalUser: function() {
     const db = wx.cloud.database()
 
-    if (!/^[0-9a-zA-Z_]{1, 14}$/.test(this.data.licalIdInput)) {
+    console.log(this.data.licalIdInput)
+    if (!/^[0-9a-zA-Z_]{4,16}$/.test(this.data.licalIdInput)) {
       wx.showToast({
         icon: 'none',
-        title: 'Input format error!',
+        title: 'Lical ID 只能是 4 至 16 位数字字母以及下划线的组合！',
       })
       return
     }
 
     if (this.data.logged) {
-      wx.switchTab({ url: '/pages/home/home' })
+      this.onNavigateToHome()
       return
     }
 
@@ -123,6 +123,7 @@ Page({
           this.onNavigateToHome()
         } else {
           this.setData({
+            logged: false,
             isLogging: false,
           })
         }
@@ -209,6 +210,10 @@ Page({
         console.error(e)
       }
     })
+  },
+
+  getLicalUserInfo: function() {
+    return app.globalData.licalUserInfo || {}
   },
 
 })
