@@ -1,0 +1,53 @@
+<view class="page page-post theme-{{ currentUser.theme || 'light' }}">
+  <view class="page-header">
+    我的卡包
+  </view>
+  <view class="page-content">
+    <view 
+      wx:if="{{ cards && cards.length }}"
+      class="page-cards"
+    >
+      <view class="page-card page-card-position">
+        当前定位：
+        <button
+          class="button-link"
+          bindtap="handlePostionTap"
+        >
+          {{ position && position.title || '不显示定位'}}
+        </button>
+      </view>
+      <view
+        wx:for="{{ cards }}"
+        wx:for-item="card"
+        class="page-card"
+      >
+        <view class="page-card-header">
+          <span>
+            {{ card.icon }} {{ card.name }}卡
+          </span>
+
+          <button
+            class="post-button"
+            type="{{ card.button.action === 'end' ? 'warn' : 'primary' }}"
+            data-type="{{ card.type }}"
+            data-action="{{ card.button.action }}"
+            bindtap="handlePostButtonTap"
+            disabled="{{ card.button.disabled }}"
+          >
+            {{ card.button.name }}
+          </button>
+        </view>
+        <view class="page-card-content">
+          <view
+            wx:for="{{ card.tips }}"
+            wx:for-item="cardTip"
+            class="page-card-tip {{ cardTip.type }}"
+          >
+            <view class="page-card-tip-dot"></view>
+            {{ cardTip.content }}
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,38 @@
+<!--index.wxml-->
+<view class="page-index">
+  <view class="module-welcome">
+    <view class="userinfo">
+      <div class="userinfo-avatar">
+        <image src="{{ wxUserInfo.avatarUrl || defaultAvatarUrl }}"></image>
+      </div>
+      <text class="userinfo-nickname">
+        {{ wxUserInfo.nickName }}
+      </text>
+    </view>
+    <view class="userform">
+      <input
+        wx:if="{{ !isLogging }}"
+        class="userform-input"
+        placeholder="Create Your Lical ID"
+        bindinput="onIdInput"
+      />
+      <button
+        wx:if="{{ !isLogging && isAuthorized }}"
+        class="userform-submit"
+        type="primary"
+        bindtap="addLicalUser"
+      >
+        加入 Lical
+      </button>
+      <button
+        wx:if="{{ !isLogging && !isAuthorized }}"
+        class="userform-submit"
+        type="primary"
+        open-type="getUserInfo"
+        bindgetuserinfo="onGetWxUserInfo"
+      >
+        加入 Lical
+      </button>
+    </view>
+  </view>
+</view> 

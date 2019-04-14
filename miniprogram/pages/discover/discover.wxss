@@ -1,9 +1,9 @@
-.page-discover {
-  display: flex;
-  flex-direction: column;
-}
-
 .page-in-dev {
   margin-top: 16px;
   margin-left: 16px;
+}
+
+.page-discover.theme-dark {
+  color: #efefef;
+  background: #2f2f2f;
 }

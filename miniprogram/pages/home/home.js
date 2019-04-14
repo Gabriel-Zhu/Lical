@@ -1,23 +1,6 @@
+import { dateToJson } from '../../utils/index'
+
 const app = getApp()
-
-const ACTIVITY_DESC_MAP = {
-  'sleep': 'went to sleep',
-  'get_up': 'went up',
-}
-
-const ACTIVITY_DEFAULT_CONTENT_MAP = {
-  'sleep': '晚安！😴',
-  'get_up': '早安！🌞',
-}
-
-const ACTIVITY_TIP_MAP = {
-  'sleep': {
-    'danger': '晚睡猝死警告',
-  },
-  'get_up': {
-    'danger': '晚起毁一天警告',
-  },
-}
 
 const getInitialActivityListQuery = () => ({
   skip: 0,
@@ -26,9 +9,10 @@ const getInitialActivityListQuery = () => ({
 
 Page({
   data: {
-    pageTimestamp: new Date().getTime(),
-    activityTipMap: ACTIVITY_TIP_MAP,
-    scrollTop: 0,
+    currentUser: {},
+    isFetchingActivityList: false,
+    currentTime: new Date().getTime(),
+    deadline: new Date().getTime(),
     tabs: [
       {
         name: '关注',
@@ -39,26 +23,37 @@ Page({
         isActive: false,
       },
     ],
-    postButtonsShown: false,
-    activityDescMap: ACTIVITY_DESC_MAP,
-    activityDefaultContentMap: ACTIVITY_DEFAULT_CONTENT_MAP,
     activityList: [],
-    userMap: {},
     activityListQuery: getInitialActivityListQuery(),
   },
 
-  onSwitchTab: function(e) {
-    this.setData({
-      tabs: this.data.tabs.map(tab => ({
-        ...tab,
-        isActive: tab.name === e.currentTarget.dataset.tabName,
-      })),
-    })
-
-    this.onGetActivityList(true)
+  onLoad() {
+    this.timer = setInterval(() => {
+      this.setData({ currentTime: new Date().getTime() })
+    }, 1000)
   },
 
-  onLoad: function () {
+  onShow() {
+    this.initializePage()
+  },
+
+  onUnload() {
+    clearInterval(this.timer)
+  },
+
+  onPullDownRefresh: function() {
+    this.getActivityList(true).then(() => {
+      wx.stopPullDownRefresh()
+    })
+  },
+
+  initializePage: function() {
+    app.initializeApp()
+
+    this.setData({
+      currentUser: app.globalData.licalUserInfo,
+    })
+
     if (!wx.cloud) {
       wx.showToast({
         icon: 'none',
@@ -69,179 +64,265 @@ Page({
 
     if (
       !app.globalData.licalUserInfo
-        || !app.globalData.licalUserInfo.lical_id
+      || !app.globalData.licalUserInfo.lical_id
     ) {
       wx.navigateTo({
         url: '/pages/index/index',
       })
-    } 
+    }
 
     const timer = setInterval(() => {
       if (
         app.globalData.licalUserInfo
-          && app.globalData.licalUserInfo.lical_id
+        && app.globalData.licalUserInfo.lical_id
       ) {
         wx.showShareMenu()
 
-        this.onGetActivityList(true)
+        this.getActivityList()
         clearInterval(timer)
       }
-       
+
     }, 500)
   },
 
-  onButtonsToggle: function() {
-    this.setData({ postButtonsShown: !this.data.postButtonsShown })
-  },
-
-  onScrollToTop: function() {
-    this.setData({ scrollTop: 0 })
-  },
-
-  onScrollToBottom: function() {
-    this.onGetActivityList()
-  },
-
-  onScroll: function(e) {
-    this.setData({ scrollTop: e.detail.scrollTop })
-  },
-
-  onGetActivityList: function(isRefresh = false) {
-    if (isRefresh) {
+  onSwitchTab: function (e) {
+    const { tabName } = e.currentTarget.dataset
+    const { tabs, isFetchingActivityList } = this.data
+    if (
+      !isFetchingActivityList
+      && !tabs.find(tab => tab.name === tabName).isActive
+    ) {
       this.setData({
-        pageTimestamp: new Date().getTime(),
-        activityList: [],
-        userMap: {},
-        activityListQuery: getInitialActivityListQuery(),
+        tabs: tabs.map(tab => ({
+          ...tab,
+          isActive: tab.name === tabName,
+        })),
+      })
+
+      this.getActivityList(true)
+    }
+  },
+
+  onButtonsToggle: function() {
+    const { postButtonsShown, postButtons } = this.data
+    if (postButtonsShown) {
+      this.setData({ postButtonsShown: false })
+    } else {
+      this.onGetLastActivity().then(({ result: lastActivity }) => {
+        this.setData({
+          postButtonsShown: true,
+          postButtons: this.getPostButtons(lastActivity),
+        })
       })
     }
+  },
+
+  onReachBottom: function() {
+    this.getActivityList()
+  },
+
+  getActivityList: function(isRefresh = false) {
+    if (this.data.isFetchingActivityList) {
+      return Promise.reject()
+    }
+
+    if (isRefresh) {
+      wx.showLoading({
+        title: '正在刷新',
+      })
+    }
+
+    this.setData({
+      isFetchingActivityList: true,
+      ...(isRefresh ? {
+        deadline: new Date().getTime(),
+        activityListQuery: getInitialActivityListQuery(),
+      } : {}),
+    })
 
     const db = wx.cloud.database()
     const _ = db.command
     const { activityListQuery: { skip, limit } } = this.data
-    const filter = {
-      created_at: _.gt(new Date().getTime() - 30 * 24 * 60 * 60 * 1000)
-        .and(_.lt(this.data.pageTimestamp)),
-    }
+    const query = {}
 
     if (this.data.tabs[1].isActive) {
-      filter._openid = app.globalData.openid
+      query._openid = app.globalData.openid
     }
 
-    db.collection('activities')
-      .where(filter)
-      .orderBy('created_at', 'desc')
-      .skip(skip)
-      .limit(limit)
-      .get({
+    return new Promise((resolve, reject) => {
+      wx.cloud.callFunction({
+        name: 'getActivityList',
+        data: {
+          query,
+          options: {
+            deadline: this.data.deadline,
+            skip,
+            limit,
+            completedActivityOnly: true,
+          },
+        },
         success: res => {
-          const userIds = []
-          const newActivities = res.data.map(activity => {
-            const { type, lical_id, created_at } = activity
-            const finalActivity = {
-              ...activity,
-              formated_created_at: this.formatDate(created_at),
-            }
-            const {
-              formated_created_at: { hours },
-            } = finalActivity
-
-            if (type === 'get_up' && hours >= 9 && hours < 12) {
-              finalActivity.tip = {
-                type: 'danger',
-              }
-            } else if (type === 'sleep' && hours >= 0 && hours <= 11) {
-              finalActivity.tip = {
-                type: 'danger',
-              }
-            }
-
-            userIds.push(lical_id)
-
-            return finalActivity
-          })
-
-          this.onGetUserList(userIds)
           this.setData({
+            isFetchingActivityList: false,
             activityList: [
-              ...this.data.activityList,
-              ...newActivities,
+              ...(isRefresh ? [] : this.data.activityList),
+              ...res.result.list.map(activity => {
+                const { type, lical_id, created_at } = activity
+                const finalActivity = {
+                  ...activity,
+                  json_created_at: dateToJson(created_at),
+                  related_activity: activity.related_activity ? {
+                    ...activity.related_activity,
+                    json_created_at: dateToJson(activity.related_activity.created_at)
+                  } : undefined,
+                }
+
+                return {
+                  ...finalActivity,
+                  tips: this.getActivityTips(finalActivity),
+                }
+              }),
             ],
             activityListQuery: {
               skip: skip + limit,
               limit,
-            }, 
+            },
           })
+
+          if (isRefresh) {
+            wx.hideLoading({
+              success: () => {
+                resolve()
+              },
+            })
+
+            return
+          }
+          resolve()
         },
+        fail: reject,
       })
-  },
-
-  onGetUserList: function(licalIds) {
-    const db = wx.cloud.database()
-    const _ = db.command
-
-    db.collection('users')
-      .where({ lical_id: _.in(licalIds) })
-      .get({
-        success: res => {
-          this.setData({
-            userMap: res.data.reduce((result, item) => ({
-              ...result,
-              [item.lical_id]: item,
-            }), this.data.userMap),
-          })
-        },
-      })
-  },
-
-  onPost: function(type) {
-    const db = wx.cloud.database()
-    const { licalUserInfo: { lical_id } } = app.globalData
-
-    db.collection('activities').add({
-      data: {
-        type,
-        lical_id,
-        created_at: new Date().getTime(),
-      },
-      success: () => {
-        wx.showToast({
-          icon: 'success',
-          title: '打卡成功！',
-        })
-
-        this.onGetActivityList(true)
-      },
     })
   },
 
-  onSleep: function() {
-    this.onPost('sleep')
+  onGetLastActivity: function() {
+    return new Promise((resolve, reject) => {
+      wx.cloud.callFunction({
+        name: 'getLastActivity',
+        data: {
+          query: { _openid: app.globalData.openid }
+        },
+        success: resolve,
+        fail: reject,
+      })
+    })
   },
 
-  onGetUp: function () {
-    this.onPost('get_up')
+  onPost: function(event) {
+    wx.navigateTo({
+      url: 'pages/post/post',
+    })
   },
 
-  formatDate: function(timestamp) {
-    const add0 = m => m < 10 ? '0' + m : m
-    //timestamp是整数，否则要parseInt转换
-    const time = new Date(timestamp)
-    const years = time.getFullYear()
-    const months = time.getMonth() + 1
-    const days = time.getDate()
-    const hours = time.getHours()
-    const minutes = time.getMinutes()
-    const seconds = time.getSeconds()
-    return {
-      years,
-      months,
-      days,
-      hours,
-      minutes,
-      seconds,
-      date: `${years}-${add0(months)}-${add0(days)}`,
-      time: `${add0(hours)}:${add0(minutes)}`,
+  getActivityTips: function(activity = {}) {
+    const {
+      is_invalid,
+      type,
+      action,
+      is_afternoon,
+      related_activity,
+      created_at,
+      json_created_at: { hours } = {},
+    } = activity
+    const tips = []
+
+    if (type === undefined || hours === undefined) {
+      return null
     }
+
+    if (is_invalid) {
+      tips.push({
+        type: 'danger',
+        content: '该记录无效',
+      })
+    }
+
+    const duration = related_activity
+      ? created_at - related_activity.created_at
+      : (
+        created_at > 1554689082873
+          ? new Date().getTime() - created_at
+          : undefined
+      )
+
+    if (action !== 'start') {
+      switch (type) {
+        case 'sleep': {
+          if (hours >= 9 && hours < 12) {
+            tips.push({
+              type: 'warn',
+              content: '建议 9 点之前起床',
+            })
+          }
+
+          if (duration !== undefined) {
+            tips.push({
+              type: hours < 12 && duration < 8 * 60 * 60 * 1000
+                ? 'warn'
+                : 'normal',
+              content: `本次${
+                is_afternoon ? '午睡' : '睡眠'
+                }时长${
+                this.formatDuration(duration)
+                }`,
+            })
+          }
+
+          break
+        }
+        case 'exercise': {
+          tips.push({
+            type: 'normal',
+            content: `本次运动时长${this.formatDuration(duration)}`,
+          })
+          break
+        }
+        default:
+          break
+      }
+    }
+
+    return tips
   },
+
+  formatDuration: function(duration = 0) {
+    const totalSeconds = parseFloat(duration) / 1000   //先将毫秒转化成秒
+    const _days = parseInt(totalSeconds / (24 * 60 * 60), 10)
+    const hours = parseInt(totalSeconds % (24 * 60 * 60) / (60 * 60), 10)
+    const minutes = parseInt(totalSeconds % (60 * 60) / 60, 10)
+    const seconds = parseInt(totalSeconds % 60, 10)
+    const dayStr = _days
+      ? ` ${_days} 天`
+      : ''
+    const hourStr = (_days || hours)
+      ? ` ${hours} 小时`
+      : ''
+    const minuteStr = (_days || hours || minutes)
+      ? ` ${minutes} 分`
+      : ''
+    const secondStr = (_days || hours || minutes || seconds)
+      ? ` ${seconds} 秒`
+      : ''
+
+    return `${dayStr}${hourStr}${minuteStr}${secondStr}`
+  },
+
+  handlePositionOpen: function(e) {
+    const { position: { location } } = e.currentTarget.dataset
+
+    wx.openLocation({
+      latitude: location.lat,
+      longitude: location.lng,
+    })
+  }
 })

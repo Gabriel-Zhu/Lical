@@ -1,94 +1,37 @@
-<!--pages/home/home.wxml-->
-<view class="page-home {{ scrollTop > 0 ? 'is-scrolling' : '' }}">
-  <div class="page-header">
+<import src="../../templates/activity.wxml" />
+
+<view class="page page-home theme-{{ currentUser.theme || 'light' }}">
+  <view class="page-header">
     <span
       wx:for="{{ tabs }}"
       wx:for-item="tab"
       wx:key="name"
-      class="home-tab {{ tab.isActive ? 'is-active' : '' }}"
+      class="page-tab {{ tab.isActive ? 'is-active' : '' }}"
       bindtap="onSwitchTab"
       data-tab-name="{{ tab.name }}"
     >
       {{ tab.name }}
     </span>
-  </div>
-  <scroll-view
-    class="page-content"
-    scroll-y
-    bindscrolltoupper="onScrollToTop"
-    bindscrolltolower="onScrollToBottom"
-    lower-threshold="50"
-    bindscroll="onScroll"
-  >
-    <div class="home-module-activities">
-      <div
+    <navigator
+      class="home-button-post"
+      url="/pages/post/post"
+    >
+      +
+    </navigator>
+  </view>
+  <view class="page-content">
+    <view class="home-activities">
+      <block
         wx:for="{{ activityList }}"
         wx:for-index="index"
         wx:for-item="activity"
-        wx:key="_id"
-        class="home-module-activity"
+        wx:key="activity._id"
       >
-        <div
-          wx:if="{{ index === 0 || activityList[index - 1].formated_created_at.date !== activity.formated_created_at.date }}" 
-          class="home-date"
-        >
-          {{ activity.formated_created_at.date }}
-        </div>
-        <div class="home-card">
-          <div class="home-card-content">
-            <div class="home-card-content-left">
-              <image src="{{ userMap[activity.lical_id].avatarUrl }}">
-              </image>
-            </div>
-            <div class="home-card-content-right">
-              <div class="home-activity-header">
-                <div>
-                  <span class="home-activity-user">
-                    {{ userMap[activity.lical_id].nickName }}
-                  </span>
-                  @{{ activity.lical_id }} · {{ activity.formated_created_at.time }}
-                </div>
-                <div
-                  wx:if="{{ activity.tip }}"
-                  class="home-activity-tip {{ activity.tip ? activity.tip.type : '' }}"
-                >
-                  <div class="home-activity-tip-dot"></div>
-                  {{ activityTipMap[activity.type][activity.tip.type] }}
-                </div>
-              </div>
-              <div class="home-activity-content">
-                {{ activity.content || activityDefaultContentMap[activity.type] }}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="home-module-footer">
-        仅展示近 30 天动态
-      </div>
-    </div>
-  </scroll-view>
-  <div wx:if="{{ postButtonsShown }}" class="home-buttons">
-    <button
-      class="home-button"
-      type="primary"
-      bindtap="onSleep"
-    >
-      睡觉打卡
-    </button>
-    <button
-      class="home-button"
-      type="primary"
-      bindtap="onGetUp"
-    >
-      起床打卡
-    </button>
-  </div>
-  <button
-    class="home-button-post"
-    type="primary"
-    bindtap="onButtonsToggle"
-  >
-    +
-  </button>
+        <template is="activity" data="{{ activityList, activity, index }}" ></template>
+      </block>
+      <view class="home-module-footer">
+        {{ isFetchingActivityList ? '列表加载中' : '仅展示近 30 天动态' }}
+      </view>
+    </view>
+  </view>
 </view>

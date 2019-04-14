@@ -1,3 +1,14 @@
-<view class="page-discover">
-  <span class="page-in-dev">页面功能开发中...</span>
+<view class="page page-discover theme-{{ currentUser.theme || 'light' }}">
+  <view class="page-header">
+    <span
+      wx:for="{{ tabs }}"
+      wx:for-item="tab"
+      wx:for-index="tabKey"
+      class="page-tab {{ tab.isActive ? 'is-active' : '' }}"
+      bindtap="onSwitchTab"
+      data-tab-key="{{ tabKey }}"
+    >
+      {{ tab.name }}
+    </span>
+  </view>
 </view>

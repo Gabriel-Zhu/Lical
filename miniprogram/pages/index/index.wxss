@@ -1,75 +1,11 @@
-page {
-  background: #f6f6f6;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-}
-
 .page-index {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  width: 100%;
-  height: 100%;
-}
-
-.module-welcome {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
   align-items: center;
   width: 100%;
-  height: 60%;
-}
-
-.userinfo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.userinfo-avatar {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 1px solid #ccc;
-  border-radius: 82px;
-  padding: 4px;
-  width: 82px;
-  height: 82px;
-  box-sizing: border-box;
-  box-shadow: 0 0 8px #ccc;
-}
-
-.userinfo-avatar image {
-  display: flex;
-  border: 1px solid #ededed;
-  border-radius: 100%;
-  width: 70px;
-  height: 70px;
-  overflow: hidden;
-}
-
-.userinfo-nickname {
-  margin-top: 8px;
-  font-size: 16px;
-  font-weight: 500;
-  color: #888;
-}
-
-.userform-input {
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 6px 12px;
-  font-size: 14px;
-}
-
-.userform-submit {
-  margin-top: 8px;
-  width: 120px;
-  line-height: 40px;
+  min-height: 100vh;
+  background: #fff;
 }
 
 .module-authorize {
@@ -86,9 +22,9 @@ page {
 }
 
 .appinfo-logo {
-  border-radius: 64px;
-  width: 64px;
-  height: 64px;
+  border-radius: 80px;
+  width: 80px;
+  height: 80px;
   background-size: contain;
 }
 

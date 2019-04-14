@@ -1,3 +1,5 @@
+const app = getApp()
+
 // pages/me/me.js
 Page({
 
@@ -5,62 +7,105 @@ Page({
    * 页面的初始数据
    */
   data: {
-
+    isEverAvailable: false,
+    authorizeFields: [
+      {
+        scope: 'scope.userInfo',
+        desc: '允许获取用户信息',
+        isAvailable: false,
+        isEverAvailable: true,
+      },
+      {
+        scope: 'scope.userLocation',
+        desc: '允许获取当前位置',
+        isAvailable: false,
+        isEverAvailable: true,
+      },
+    ],
+    currentUser: {},
   },
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad: function (options) {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面显示
-   */
   onShow: function () {
-
+    this.initializePage()
   },
 
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide: function () {
+  initializePage: function() {
+    app.initializeApp()
 
+    this.initializeAuthorizeFields()
   },
 
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload: function () {
+  initializeAuthorizeFields: function() {
+    wx.getSetting({
+      success: res => {
+        const newAuthorizeFields = this.data.authorizeFields.map(
+          authorizeField => ({
+            ...authorizeField,
+            isAvailable: res.authSetting[authorizeField.scope],
+            isEverAvailable: [false, true].includes(
+              res.authSetting[authorizeField.scope]
+            ),
+          })
+        )
 
+        const isEverAvailable = newAuthorizeFields
+          .map(f => f.isEverAvailable)
+          .includes(true)
+
+        this.setData({
+          isEverAvailable,
+          authorizeFields: newAuthorizeFields,
+          currentUser: app.globalData.licalUserInfo,
+        })
+      },
+    })
   },
 
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh: function () {
+  onSwitchTheme: function(e) {
+    const updateFields = {}
 
+    updateFields.theme = e.detail.value ? 'dark' : 'light'
+
+    wx.showLoading({
+      title: '主题切换中...',
+    })
+
+    wx.cloud.callFunction({
+      name: 'updateUser',
+      data: {
+        query: {
+          _id: this.data.currentUser._id,
+        }, 
+        body: updateFields,
+      },
+      success: () => {
+        app.globalData.licalUserInfo.theme = updateFields.theme
+
+        this.initializePage()
+
+        wx.hideLoading({
+          success: () => {
+            wx.showToast({
+              icon: 'success',
+              title: `当前为${
+                updateFields.theme === 'dark' ? '深色' : '默认'
+              }主题`,
+            })
+          },
+        })
+      },
+    })
   },
 
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom: function () {
+  onSwitchAuthInfoAvailable(e) {
+    const { scope } = e.currentTarget.dataset
 
+    wx.authorize({
+      scope,
+      success: () => {
+        this.initializePage()
+      },
+      fail: console.log,
+    })
   },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage: function () {
-
-  }
 })

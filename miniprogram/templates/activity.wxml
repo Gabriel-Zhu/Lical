@@ -1,0 +1,78 @@
+<wxs src="./activity.wxs" module="tools" />
+
+<template name="activity">
+  <view class="item-activity">
+    <view
+      wx:if="{{ index === 0 || activityList[index - 1].json_created_at.dateStr !== activity.json_created_at.dateStr }}" 
+      class="item-activity-date"
+    >
+      {{ activity.json_created_at.dateStr }}
+    </view>
+    <view class="page-card">
+      <view class="page-card-content">
+        <image
+          class="item-activity-avatar"
+          src="{{ activity.user.avatarUrl }}"
+        >
+        </image>
+        <view class="item-activity-detail">
+          <view class="item-activity-detail-header">
+            <button class="button-link item-activity-detail-user">
+              {{ activity.user.nickName }}
+            </button>
+            <span class="item-activity-detail-user-extra">
+              @{{ activity.lical_id }} · {{ activity.json_created_at.timeStr }}
+            </span>
+          </view>
+          <view class="item-activity-detail-content">
+            <view
+              wx:for="{{ tools.getActivityContentLines(activity) }}"
+              wx:for-item="activityContentLine"
+              wx:for-index="activityContentLineIndex"
+              class="item-activity-detail-content-line"
+            >
+              <icon
+                wx:if="{{ activityContentLineIndex === 0 }}"
+                class="item-activity-icon"
+                type="{{ tools.getActivityIconType(activity) }}"
+                size="14"
+              />
+              {{ activityContentLine }}
+            </view>
+          </view>
+          <view
+            wx:if="{{ activity.position && activity.position.id }}"
+            class="page-activity-footer"
+          >
+            <button
+              class="button-link item-activity-detail-location"
+              data-position="{{ activity.position }}"
+              bindtap="handlePositionOpen"
+            >
+              {{ activity.position.ad_info.city }} · {{ activity.position.title }}
+            </button>
+          </view>
+        </view>
+      </view>
+      <!-- <view
+        wx:if="{{ activity.tips && activity.tips.length }}"
+        class="page-card-footer"
+      >
+        <view
+          wx:if="{{ activity.tips && activity.tips.length }}"
+          class="page-activity-tips"
+        >
+          <view
+            wx:for="{{ activity.tips }}"
+            wx:for-item="activityTip"
+            wx:key="{{ activity._id }}"
+            class="item-activity-detail-tip {{ activityTip.type }}"
+          >
+            <view class="item-activity-detail-tip-dot"></view>
+            {{ activityTip.content }}
+          </view>
+        </view>
+      </view> -->
+    </view>
+  </view>
+</template>

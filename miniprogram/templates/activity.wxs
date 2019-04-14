@@ -1,0 +1,167 @@
+var ACTIVITY_TYPE_MAP = {
+  sleep: '睡眠',
+  exercise: '运动',
+  travel: '发布签到',
+}
+
+var ACTIVITY_ACTION_MAP = {
+  start: '正在进行',
+  end: '完成了一次',
+}
+
+var getActivityName = function(activity) {
+  return {
+    sleep: activity.is_afternoon ? '午睡' : '睡眠',
+    exercise: '运动',
+  }[activity.type]
+}
+
+var formatDuration = function(duration = 0) {
+  var totalSeconds = parseFloat(duration) / 1000   //先将毫秒转化成秒
+  var _days = parseInt(totalSeconds / (24 * 60 * 60), 10)
+  var hours = parseInt(totalSeconds % (24 * 60 * 60) / (60 * 60), 10)
+  var minutes = parseInt(totalSeconds % (60 * 60) / 60, 10)
+  var seconds = parseInt(totalSeconds % 60, 10)
+
+  var dayStr = ''
+  if (_days) {
+    dayStr = ' ' + _days + ' 天'
+  }
+
+  var hourStr = ''
+  if (_days || hours) {
+    hourStr = ' ' + hours + ' 小时'
+  }
+
+  var minuteStr = ''
+  if (_days || hours || minutes) {
+    minuteStr = ' ' + minutes + ' 分'
+  }
+
+  var secondStr = ''
+  if (_days || hours || minutes || seconds) {
+    secondStr = ' ' + seconds + ' 秒'
+  }
+
+  return dayStr + hourStr + minuteStr + secondStr
+}
+
+var getActivityIconType = function(activity) {
+  return {
+    start: 'waiting',
+    end: 'success',
+  }[activity.action] || 'success'
+}
+
+var getActivityContentLines = function(activity) {
+  var contentLines = []
+  var desc = (ACTIVITY_ACTION_MAP[activity.action] || '')
+    + (ACTIVITY_TYPE_MAP[activity.type] || '')
+    + (activity.action ? '记录' : '')
+
+  contentLines.push(desc)
+
+  if (activity.action) {
+    if (activity.action === 'end') {
+      contentLines.push(
+        '开始于 '
+        + activity.related_activity.json_created_at.dateStr
+        + ' '
+        + activity.related_activity.json_created_at.timeStr
+      )
+    }
+
+    if (activity.action === 'start') {
+      contentLines.push(
+        ({ start: '开始', end: '结束' }[activity.action])
+          + '于 '
+          + activity.json_created_at.dateStr
+          + ' '
+          + activity.json_created_at.timeStr
+      )
+
+      contentLines.push(
+        '已进行' + formatDuration(getDate().getTime() - activity.created_at)
+      )
+    }
+
+    if (activity.type === 'sleep' && activity.action === 'end') {
+      contentLines.push(
+        '时长' + formatDuration(activity.duration)
+      )
+    }
+  }
+
+  return contentLines
+}
+
+var getActivityTips = function (activity = {}) {
+  var is_invalid = activity.is_invalid
+  var type = activity.type
+  var action = activity.action
+  var is_afternoon = activity.is_afternoon
+  var related_activity = activity.related_activity
+  var created_at = activity.created_at
+  var hours = activity.json_created_at.hours
+
+  var tips = []
+
+  if (type === undefined || hours === undefined) {
+    return null
+  }
+
+  if (is_invalid) {
+    tips.push({
+      type: 'danger',
+      content: '该记录无效',
+    })
+  }
+
+  var duration = related_activity
+    ? created_at - related_activity.created_at
+    : (
+      created_at > 1554689082873
+        ? getDate().getTime() - created_at
+        : undefined
+    )
+
+  if (action !== 'start') {
+    switch (type) {
+      case 'sleep': {
+        if (hours >= 9 && hours < 12) {
+          tips.push({
+            type: 'warn',
+            content: '建议 9 点之前起床',
+          })
+        }
+
+        if (duration !== undefined) {
+          tips.push({
+            type: hours < 12 && duration < 8 * 60 * 60 * 1000
+              ? 'warn'
+              : 'normal',
+            content: '本次' + (is_afternoon ? '午睡' : '睡眠') + formatDuration(duration),
+          })
+        }
+
+        break
+      }
+      case 'exercise': {
+        tips.push({
+          type: 'normal',
+          content: '本次运动时长' + formatDuration(duration),
+        })
+        break
+      }
+      default:
+        break
+    }
+  }
+
+  return tips
+}
+
+module.exports = {
+  getActivityContentLines: getActivityContentLines,
+  getActivityIconType: getActivityIconType,
+}

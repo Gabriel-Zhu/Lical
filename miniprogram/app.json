@@ -17,17 +17,23 @@
   },
   "pages": [
     "pages/index/index",
+    "pages/register/register",
     "pages/home/home",
     "pages/discover/discover",
-    "pages/me/me"
+    "pages/me/me",
+    "pages/post/post",
+    "pages/locate/locate"
   ],
   "window": {
-    "backgroundColor": "#F6F6F6",
-    "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#F6F6F6",
+    "backgroundColor": "#FFFFFF",
+    "backgroundTextStyle": "dark",
     "navigationBarTitleText": "Lical",
-    "navigationBarTextStyle": "black"
-
+    "navigationBarTextStyle": "black",
+    "navigationBarBackgroundColor": "#FFFFFF"
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "你的地理位置信息将被用于所有页面的位置展示"
+    }
   }
-
 }

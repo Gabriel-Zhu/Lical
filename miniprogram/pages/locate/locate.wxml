@@ -1,0 +1,30 @@
+<view class="page page-locate theme-{{ currentUser.theme || 'light' }}">
+  <view class="page-content">
+    <view class="page-card">
+      <view class="page-card-header">
+        推荐定位
+      </view>
+      <view class="page-card-content">
+        <button 
+          class="page-locate-position button-link"
+          data-position="{{ null }}"
+          bindtap="onPositionChange"
+        >
+          不显示定位
+        </button>
+        <button 
+          wx:for="{{ positions }}"
+          wx:for-item="position"
+          class="page-locate-position button-text"
+          data-position="{{ position }}"
+          bindtap="onPositionChange"
+        >
+          {{ position.title }}
+        </button>
+      </view>
+      <view class="page-card-footer">
+        以上地理位置信息由腾讯地图提供
+      </view>
+    </view>
+  </view>
+</view>
