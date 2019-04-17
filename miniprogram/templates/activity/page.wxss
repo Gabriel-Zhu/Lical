@@ -1,0 +1,84 @@
+.page-card.page-activity-detail {
+  border-radius: 0;
+}
+
+.page-activity-detail-avatar {
+  display: flex;
+  margin-right: 16px;
+  border-radius: 4px;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+}
+
+.page .button-link.page-activity-detail-user {
+  flex-shrink: 0;
+  display: flex;
+  margin-right: 4px;
+  line-height: 20px;
+  font-weight: bold;
+}
+
+.page-activity-detail-user-extra {
+  flex-shrink: 0;
+  display: flex;
+  color: #888;
+}
+
+.page-activity-detail .page-card-content {
+  padding-top: 0;
+}
+
+.page-activity-detail-content {
+  display: flex;
+  flex-direction: column;
+  margin-top: 8px;
+}
+
+.page-activity-detail-content-line {
+  display: flex;
+  align-items: center;
+}
+
+.page-activity-detail-content-line:nth-child(1) {
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.page-activity-detail-content-icon {
+  margin-right: 4px;
+}
+
+.page-activity-detail-time-and-position {
+  display: flex;
+  align-items: center;
+  margin-top: 16px;
+  color: #888;
+}
+
+.page-activity-detail-time {
+  line-height: 1;
+}
+
+.button-link.page-activity-detail-position {
+  margin-left: 4px;
+  padding: 0;
+  width: atuo;
+  font-size: 14px;
+  background: none;
+}
+
+.button-link.page-activity-detail-position:after {
+  border: none;
+  background: none;
+}
+
+.page-activity-detail-interactions {
+  display: flex;
+  align-items: center;
+}
+
+.page-activity-detail-interaction {
+  width: 50%;
+  text-align: center;
+}

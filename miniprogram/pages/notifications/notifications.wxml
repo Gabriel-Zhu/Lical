@@ -1,0 +1,55 @@
+<view class="page page-notifications theme-{{ currentUser.theme || 'light' }}">
+  <view class="page-header">
+    <span
+      wx:for="{{ tabs }}"
+      wx:for-item="tab"
+      wx:for-index="tabKey"
+      class="page-tab {{ tab.isActive ? 'is-active' : '' }}"
+      bindtap="onSwitchTab"
+      data-tab-key="{{ tabKey }}"
+    >
+      {{ tab.name }}
+    </span>
+  </view>
+  <view class="page-content">
+    <view class="page-notifications-list">
+      <navigator
+        wx:for="{{ praiseList }}"
+        wx:for-item="praiseItem"
+        wx:key="{{ praiseItem._id }}"
+        url="/pages/activity/activity?_id={{ praiseItem.to }}"
+        class="page-card page-notifications-item"
+      >
+        <view class="page-card-header">
+          <image
+            class="page-notifications-from-avatar"
+            src="{{ praiseItem.fromUser.avatarUrl }}"
+          >
+          </image>
+          <view  class="page-notifications-desc">
+            <view class="page-notifications-from-userinfo">
+              <button class="button-link page-notifications-from-nickname">
+                {{ praiseItem.fromUser.nickName }}
+              </button>
+              <view class="page-notifications-from-id">
+                @{{ praiseItem.from }}
+              </view>
+            </view>
+            <view class="text-info page-notifications-time">
+              {{ praiseItem.jsonCreatedAt.dateStr }} {{ praiseItem.jsonCreatedAt.timeStr }}
+            </view>
+          </view>
+        </view>
+        <view class="page-card-content">
+          赞了你的{{ entityTypeMap[praiseItem.type] }}
+        </view>
+      </navigator>
+      <view
+        wx:if="{{ !praiseList || !praiseList.length }}"
+        class="page-notifications-list-footer"
+      >
+        暂未收到通知
+      </view>
+    </view>
+  </view>
+</view>

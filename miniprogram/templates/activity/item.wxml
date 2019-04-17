@@ -1,6 +1,6 @@
-<wxs src="./activity.wxs" module="tools" />
+<wxs src="./index.wxs" module="tools" />
 
-<template name="activity">
+<template name="item-activity">
   <view class="item-activity">
     <view
       wx:if="{{ index === 0 || activityList[index - 1].json_created_at.dateStr !== activity.json_created_at.dateStr }}" 
@@ -21,7 +21,7 @@
               {{ activity.user.nickName }}
             </button>
             <span class="item-activity-detail-user-extra">
-              @{{ activity.lical_id }} · {{ activity.json_created_at.timeStr }}
+              @{{ activity.lical_id }}
             </span>
           </view>
           <view class="item-activity-detail-content">
@@ -29,6 +29,7 @@
               wx:for="{{ tools.getActivityContentLines(activity) }}"
               wx:for-item="activityContentLine"
               wx:for-index="activityContentLineIndex"
+              wx:key="*this"
               class="item-activity-detail-content-line"
             >
               <icon
@@ -40,17 +41,38 @@
               {{ activityContentLine }}
             </view>
           </view>
-          <view
-            wx:if="{{ activity.position && activity.position.id }}"
-            class="page-activity-footer"
-          >
+          <view class="page-activity-footer">
             <button
+              wx:if="{{ activity.position && activity.position.id }}"
               class="button-link item-activity-detail-location"
               data-position="{{ activity.position }}"
               bindtap="handlePositionOpen"
             >
               {{ activity.position.ad_info.city }} · {{ activity.position.title }}
             </button>
+            <view class="item-activity-detail-footer-row">
+              <view>
+                {{ activity.json_created_at.timeStr }}
+              </view>
+              <view
+                wx:if="{{ activity.action !== 'start' }}"
+                class="item-activity-detail-interaction"
+              >
+                <button
+                  class="button-link{{ activity.isPraised ? '' : ' text-info' }}"
+                  data-activity="{{ activity }}"
+                  bindtap="handlePraiseTap"
+                >
+                  {{ activity.praisesCount || 0 }} {{ activity.isPraised ? '取消赞' : '赞' }}
+                </button>
+                <navigator
+                  class="button-link text-info"
+                  url="/pages/activity/activity?_id={{ activity._id }}"
+                >
+                  {{ activity.commentsCount || 0 }} 评论
+                </navigator>
+              </view>
+            </view>
           </view>
         </view>
       </view>

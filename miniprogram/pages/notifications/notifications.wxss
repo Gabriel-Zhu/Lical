@@ -1,0 +1,65 @@
+.page-notifications-item {
+  border-radius: 0;
+  line-height: 32px;
+}
+
+.page-notifications-item + .page-notifications-item {
+  margin-top: 16px;
+}
+
+.theme-dark .page-notifications-item + .page-notifications-item {
+  border-color: rgba(255, 255, 255, .05);
+}
+
+.page-notifications-item .page-card-header {
+  padding-bottom: 0;
+}
+
+.page-notifications-from-avatar {
+  display: flex;
+  margin-right: 16px;
+  border-radius: 4px;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+}
+
+.page-notifications-desc {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.page-notifications-from-userinfo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.page .button-link.page-notifications-from-nickname {
+  flex-shrink: 0;
+  display: flex;
+  margin-right: 4px;
+  line-height: 1;
+  font-weight: bold;
+}
+
+.page-notifications-from-id {
+  flex-shrink: 0;
+  display: flex;
+  line-height: 1;
+  color: #888;
+}
+
+.page-notifications-list-footer {
+  margin-top: 32px;
+  margin-bottom: 32px;
+  padding-top: 8px;
+  font-size: 14px;
+  text-align: center;
+  color: rgba(0, 0, 0, .2);
+}
+
+.theme-dark .page-notifications-list-footer {
+  color: rgba(255, 255, 255, .2);
+}

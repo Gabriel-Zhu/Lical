@@ -8,7 +8,7 @@
         <button 
           class="page-locate-position button-link"
           data-position="{{ null }}"
-          bindtap="onPositionChange"
+          bindtap="handlePositionTap"
         >
           不显示定位
         </button>
@@ -17,7 +17,7 @@
           wx:for-item="position"
           class="page-locate-position button-text"
           data-position="{{ position }}"
-          bindtap="onPositionChange"
+          bindtap="handlePositionTap"
         >
           {{ position.title }}
         </button>

@@ -11,6 +11,7 @@ exports.main = async (event, context) => {
   const user = {
     ...event.body,
     _openid: wxContext.OPENID,
+    createdAt: new Date().getTime(),
   }
 
   const addItemRes = await db.collection('users').add({

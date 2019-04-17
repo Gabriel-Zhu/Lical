@@ -1,9 +1,37 @@
-// 云函数入口文件
+const getLastActivity = async (event, context) => {
+  const wxContext = cloud.getWXContext()
+  const queryListRes = await db.collection('activities')
+    .where({
+      _openid: wxContext.OPENID,
+      ...(event.query || {}),
+    })
+    .orderBy('created_at', 'desc')
+    .skip(0)
+    .limit(1)
+    .get()
+
+  return queryListRes.data && queryListRes.data[0] || {}
+}
+
+const updateActivity = async (event, context) => {
+  const body = {}
+
+  Object.keys(event.body).forEach(key => {
+    body[key] = _.set(event.body[key])
+  })
+
+  return await db.collection('activities')
+    .doc(event.query._id)
+    .update({
+      data: body,
+    })
+}
+
 const cloud = require('wx-server-sdk')
 cloud.init()
 
 const db = cloud.database()
-const _ = db.command
+const { command: _  } = db
 
 const isAfternoon = timestamp => {
   const hours = new Date(timestamp + 28800000).getHours()
@@ -22,14 +50,13 @@ exports.main = async (event, context) => {
   }
 
   const { _openid, type, action, created_at } = activity
-  const { result: lastActivity } = await cloud.callFunction({
-    name: 'getLastActivity',
-    data: {
-      query: {
-        _openid,
-      }, 
+
+  const lastActivity = await getLastActivity({
+    query: {
+      type,
+      _openid,
     },
-  })
+  }, context)
 
   if (
     type === lastActivity.type
@@ -64,18 +91,15 @@ exports.main = async (event, context) => {
       && action === 'end'
       && lastActivity.action === 'start'
   ) {
-    await cloud.callFunction({
-      name: 'updateActivity',
-      data: {
-        query: {
-          _id: lastActivity._id,
-        },
-        body: {
-          related_activity_id: addItemRes._id,
-          is_completed: true,
-        },
+    await updateActivity({
+      query: {
+        _id: lastActivity._id,
       },
-    })
+      body: {
+        related_activity_id: addItemRes._id,
+        is_completed: true,
+      },
+    }, context)
   }
 
   return {

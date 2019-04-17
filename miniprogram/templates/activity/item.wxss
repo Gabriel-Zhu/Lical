@@ -1,0 +1,156 @@
+.item-activity {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.item-activity + .item-activity {
+  margin-top: 16px;
+}
+
+.item-activity-date {
+  margin-bottom: 16px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.item-activity .page-card-content {
+  display: flex;
+  flex-direction: row;
+  padding: 16px;
+}
+
+.item-activity-avatar {
+  display: flex;
+  border-radius: 4px;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+}
+
+.item-activity-detail {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 16px;
+  height: 100%;
+}
+
+.item-activity-detail-header {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.page .button-link.item-activity-detail-user {
+  flex-shrink: 0;
+  display: flex;
+  margin-right: 4px;
+  line-height: 20px;
+  font-weight: bold;
+}
+
+.item-activity-detail-user-extra {
+  flex-shrink: 0;
+  display: flex;
+  color: #888;
+}
+
+.item-activity-detail-content {
+  display: flex;
+  flex-direction: column;
+  margin-top: 8px;
+}
+
+.item-activity-detail-content-line {
+  display: flex;
+  align-items: center;
+}
+
+.item-activity-detail-content-line:nth-child(1) {
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.item-activity-icon {
+  margin-right: 4px;
+}
+
+.page-activity-footer {
+  margin-top: 16px;
+}
+
+.button-link.item-activity-detail-location {
+  align-self: start;
+  padding: 0;
+  width: atuo;
+  font-size: 14px;
+  background: none;
+}
+
+.button-link.item-activity-detail-location:after {
+  border: none;
+  background: none;
+}
+
+.item-activity-detail-tips {
+  display: flex;
+  flex-direction: column;
+}
+
+.item-activity-detail-tip {
+  display: flex;
+  align-items: flex-start;
+  line-height: 20px;
+  font-size: 12px;
+}
+
+.item-activity-detail-tip-dot {
+  display: block;
+  margin-right: 6px;
+  margin-top: 8px;
+  border-radius: 4px;
+  width: 4px;
+  height: 4px;
+  background: #888;
+}
+
+.item-activity-detail-tip.danger {
+  color: #cb4042;
+}
+
+.item-activity-detail-tip.danger .item-activity-detail-tip-dot {
+  background: #cb4042;
+}
+
+.item-activity-detail-tip.normal {
+  color: #5dac81;
+}
+
+.item-activity-detail-tip.normal .item-activity-detail-tip-dot {
+  background: #5dac81;
+}
+
+.item-activity-detail-tip.warn {
+  color: #f6c555;
+}
+
+.item-activity-detail-tip.warn .item-activity-detail-tip-dot {
+  background: #f6c555;
+}
+
+.item-activity-detail-footer-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  color: #888;
+}
+
+.item-activity-detail-interaction {
+  display: flex;
+  align-items: center;
+}
+
+.item-activity-detail-interaction > .button-link {
+  width: 60px;
+  text-align: right;
+}

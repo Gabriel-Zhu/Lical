@@ -7,10 +7,11 @@ const _ = db.command
 exports.main = async (event, context) => {
   const {
     options: {
-      completedActivityOnly = false,
-      deadline,
+      completedActivityOnly = true,
+      deadline = new Date().getTime(),
       skip = 0,
-      limit = 10,
+      limit,
+      licalId,
     } = {},
     query = {},
   } = event
@@ -37,58 +38,80 @@ exports.main = async (event, context) => {
     finalQuery = query
   }
 
-  const queryListRes = await db.collection('activities')
+  let queryListCommand = db.collection('activities')
     .where(finalQuery)
     .orderBy('created_at', 'desc')
-    .skip(skip)
-    .limit(limit)
-    .get()
 
-  const { data: list } = queryListRes
+  if (skip) {
+    queryListCommand = queryListCommand.skip(skip)
+  }
+
+  if (limit) {
+    queryListCommand = queryListCommand.limit(limit)
+  }
+
+  const queryListRes = await queryListCommand.get()
+
+  const { data: activityList = [] } = queryListRes
+  const activityIds = []
   const relatedActivityIds = []
 
-  list.forEach((item, index) => {
-    const { related_activity_id } = item
-    if (related_activity_id) {
+  activityList.forEach((item, index) => {
+    const { _id, related_activity_id, action } = item
+
+    activityIds.push(_id)
+
+    if (action === 'end' && related_activity_id) {
       relatedActivityIds.push(related_activity_id)
     }
   })
 
-  const relatedActivitiesRes = await db.collection('activities')
-    .where({ _id: _.in(relatedActivityIds) })
-    .get()
+  let praiseMap = {}
+  if (licalId) {
+    const praiseListRes = await db.collection('activity_praises').where({
+      from: licalId,
+      to: _.in(activityIds),
+      status: 1,
+      createdAt: _.lt(deadline),
+    }).get()
 
-  const { data: relatedActivities } = relatedActivitiesRes
+    const { data: praiseList = [] } = praiseListRes
+    praiseMap = praiseList.reduce((result, praise) => ({
+      ...result,
+      [praise.to]: praise.status ? true : false,
+    }), {})
+  }
 
-  const lical_ids = list.map(activity => activity.lical_id)
-  const userListRes = await cloud.callFunction({
-    name: 'getUserList',
-    data: {
-      lical_ids,
-    },
-  })
+  let relatedActivityMap = {}
+  if (relatedActivityIds && relatedActivityIds.length) {
+    const relatedActivitiesRes = await db.collection('activities')
+      .where({ _id: _.in(relatedActivityIds) })
+      .get()
 
-  const { result: { list: users } } = userListRes
+    const { data: relatedActivities = [] } = relatedActivitiesRes
+    relatedActivityMap = relatedActivities.reduce((result, relatedActivity) => ({
+      ...result,
+      [relatedActivity.related_activity_id]: relatedActivity,
+    }), {})
+  }
+
+  const licalIds = Array.from(new Set(activityList.map(activity => activity.lical_id)))
+  const userListRes = await db.collection('users').where({
+    lical_id: _.in(licalIds),
+  }).get()
+
+  const { data: users = [] } = userListRes
   const userMap = users.reduce((result, user) => ({
     ...result,
     [user.lical_id]: user,
   }), {})
 
   return {
-    list: list.map((item, index) => {
-      const finalItem = {
-        ...item,
-        user: userMap[item.lical_id],
-      }
-
-      const relatedActivityIndex = relatedActivities.findIndex(
-        a => a._id === item.related_activity_id
-      )
-      if (relatedActivityIndex >= 0) {
-        finalItem.related_activity = relatedActivities[relatedActivityIndex]
-      }
-
-      return finalItem
-    }),
+    list: activityList.map((item, index) => ({
+      ...item,
+      related_activity: relatedActivityMap[item._id],
+      isPraised: praiseMap[item._id] || false,
+      user: userMap[item.lical_id],
+    })),
   }
 }

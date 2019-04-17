@@ -6,6 +6,15 @@
   font-weight: bold;
 }
 
+.page-locate .page-card-content {
+  border-top: 1px solid rgba(0, 0, 0, .03);
+  padding: 0;
+}
+
+.page-locate.theme-dark .page-card-content {
+  border-color:rgba(255, 255, 255, .03);
+}
+
 .page-locate .page-locate-position {
   text-align: left;
   padding: 0 16px;
@@ -16,15 +25,11 @@
   border-top: 1px solid rgba(0, 0, 0, .03);
 }
 
-.page-locate .page-card-content {
-  padding: 0;
+.page-locate.theme-dark .page-locate-position + .page-locate-position {
+  border-top: 1px solid rgba(255, 255, 255, .03);
 }
 
 .page-locate .page-card-footer {
   font-size: 12px;
   color: #888;
-}
-
-.page-locate.theme-dark .page-locate-position + .page-locate-position {
-  border-top: 1px solid rgba(255, 255, 255, .05);
 }

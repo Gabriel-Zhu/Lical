@@ -25,6 +25,31 @@ Page({
         if (isLogged) {
           app.globalData.licalUserInfo = licalUserInfo
           app.initializeApp()
+          
+          wx.cloud.callFunction({
+            name: 'getNotificationsCount',
+            data: {
+              query: {
+                toLicalId: licalUserInfo.lical_id,
+              },
+              options: {
+                deadline: new Date().getTime(),
+                requireUnreadCount: true,
+              },
+            },
+            success: res => {
+              const unreadPraisesCount = res.result.unreadPraisesCount || 0
+              app.globalData.unreadPraisesCount = unreadPraisesCount
+              if (unreadPraisesCount) {
+                wx.setTabBarBadge({
+                  index: 2,
+                  text: unreadPraisesCount.toString(),
+                })
+              }
+            },
+            fail: console.log,
+          })
+
           wx.switchTab({
             url: '/pages/home/home',
           })

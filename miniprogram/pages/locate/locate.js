@@ -7,7 +7,6 @@ const tcMapSDK = new TCMap({
 
 Page({
   data: {
-    currentUser: {},
     positions: [],
   },
 
@@ -16,8 +15,13 @@ Page({
     this.initializePage()
   },
 
+  onPullDownRefresh: function () {
+    this.getLocation().then(() => {
+      wx.stopPullDownRefresh()
+    })
+  },
+
   initializePage() {
-    this.setData({ currentUser: app.globalData.licalUserInfo })
     this.getLocation().then(positions => {
       this.setData({ positions })
     })
@@ -32,18 +36,15 @@ Page({
         poi_options: 'policy=4;page_size=10;page_index=1',
         get_poi: '1',
         success: res => {
-          wx.hideLoading({
-            success: () => {
-              resolve(res.result.pois)
-            },
-          })
+          wx.hideLoading()
+          resolve(res.result.pois)
         },
         fail: reject,
       })
     })
   },
 
-  onPositionChange(e) {
+  handlePositionTap(e) {
     const { position } = e.currentTarget.dataset
     const pages = getCurrentPages()
     const prevPage = pages[pages.length - 2]

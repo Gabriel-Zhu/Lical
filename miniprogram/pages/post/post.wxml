@@ -8,12 +8,20 @@
       class="page-cards"
     >
       <view class="page-card page-card-position">
-        当前定位：
+        <view class="page-card-position-left">
+          当前定位：
+          <button
+            class="button-link"
+            bindtap="handlePostionTap"
+          >
+            {{ position && position.title || '不显示定位'}}
+          </button>
+        </view>
         <button
-          class="button-link"
+          class="button-link page-card-position-right"
           bindtap="handlePostionTap"
         >
-          {{ position && position.title || '不显示定位'}}
+          修改定位 >
         </button>
       </view>
       <view

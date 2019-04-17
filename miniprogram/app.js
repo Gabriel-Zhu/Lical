@@ -15,6 +15,10 @@ App({
   },
 
   initializeApp: function() {
+    const pages = getCurrentPages()
+    const curPage = pages[pages.length - 1]
+    curPage.setData({ currentUser: this.globalData.licalUserInfo })
+
     this.updateAppTheme()
   },
 

@@ -9,7 +9,6 @@ const getInitialActivityListQuery = () => ({
 
 Page({
   data: {
-    currentUser: {},
     isFetchingActivityList: false,
     currentTime: new Date().getTime(),
     deadline: new Date().getTime(),
@@ -23,13 +22,17 @@ Page({
         isActive: false,
       },
     ],
+    includesOngoingActivity: false,
+    onPraisingActivityIds: [],
     activityList: [],
     activityListQuery: getInitialActivityListQuery(),
   },
 
   onLoad() {
     this.timer = setInterval(() => {
-      this.setData({ currentTime: new Date().getTime() })
+      if (this.data.includesOngoingActivity) {
+        this.setData({ currentTime: new Date().getTime() })
+      }
     }, 1000)
   },
 
@@ -49,10 +52,6 @@ Page({
 
   initializePage: function() {
     app.initializeApp()
-
-    this.setData({
-      currentUser: app.globalData.licalUserInfo,
-    })
 
     if (!wx.cloud) {
       wx.showToast({
@@ -138,6 +137,7 @@ Page({
         deadline: new Date().getTime(),
         activityListQuery: getInitialActivityListQuery(),
       } : {}),
+      includesOngoingActivity: isRefresh ? false : this.data.includesOngoingActivity,
     })
 
     const db = wx.cloud.database()
@@ -158,30 +158,37 @@ Page({
             deadline: this.data.deadline,
             skip,
             limit,
-            completedActivityOnly: true,
+            licalId: app.globalData.licalUserInfo.lical_id,
           },
         },
         success: res => {
+          let { includesOngoingActivity } = this.data
+
+          const newActivityList = res.result.list.map(activity => {  
+            const { type, lical_id, created_at } = activity
+
+            if (activity.action === 'start') {
+              includesOngoingActivity = true
+            }
+
+            const finalActivity = {
+              ...activity,
+              json_created_at: dateToJson(created_at),
+              related_activity: activity.related_activity ? {
+                ...activity.related_activity,
+                json_created_at: dateToJson(activity.related_activity.created_at)
+              } : undefined,
+            }
+
+            return finalActivity
+          })
+
           this.setData({
+            includesOngoingActivity,
             isFetchingActivityList: false,
             activityList: [
               ...(isRefresh ? [] : this.data.activityList),
-              ...res.result.list.map(activity => {
-                const { type, lical_id, created_at } = activity
-                const finalActivity = {
-                  ...activity,
-                  json_created_at: dateToJson(created_at),
-                  related_activity: activity.related_activity ? {
-                    ...activity.related_activity,
-                    json_created_at: dateToJson(activity.related_activity.created_at)
-                  } : undefined,
-                }
-
-                return {
-                  ...finalActivity,
-                  tips: this.getActivityTips(finalActivity),
-                }
-              }),
+              ...newActivityList,
             ],
             activityListQuery: {
               skip: skip + limit,
@@ -190,12 +197,8 @@ Page({
           })
 
           if (isRefresh) {
-            wx.hideLoading({
-              success: () => {
-                resolve()
-              },
-            })
-
+            wx.hideLoading()
+            resolve()
             return
           }
           resolve()
@@ -324,5 +327,51 @@ Page({
       latitude: location.lat,
       longitude: location.lng,
     })
-  }
+  },
+
+  handlePraiseTap(event) {
+    const { activity } = event.currentTarget.dataset
+    const { onPraisingActivityIds, activityList } = this.data
+
+    if (onPraisingActivityIds.includes(activity._id)) {
+      return
+    }
+
+    onPraisingActivityIds.push(activity._id)
+
+    const currentIsPraised = activity.isPraised ? 0 : 1 
+
+    this.setData({
+      onPraisingActivityIds,
+      activityList: activityList.map(
+        a => a._id === activity._id ? {
+          ...activity,
+          isPraised: currentIsPraised,
+          praisesCount: currentIsPraised ? (a.praisesCount || 0) + 1 : a.praisesCount - 1,
+        } : a
+      ),
+    })
+
+    wx.cloud.callFunction({
+      name: 'addPraise',
+      data: {
+        body: {
+          type: activity.type,
+          from: app.globalData.licalUserInfo.lical_id,
+          to: activity._id,
+          status: currentIsPraised,
+          toLicalId: activity.lical_id,
+        },
+      },
+      success: console.log,
+      fail: console.log,
+      complete: () => {
+        this.setData({
+          onPraisingActivityIds: onPraisingActivityIds.filter(
+            id => id !== activity._id
+          ),
+        })
+      },
+    })
+  },
 })

@@ -70,7 +70,7 @@ var getActivityContentLines = function(activity) {
         + activity.related_activity.json_created_at.timeStr
       )
     }
-
+  
     if (activity.action === 'start') {
       contentLines.push(
         ({ start: '开始', end: '结束' }[activity.action])
@@ -85,7 +85,7 @@ var getActivityContentLines = function(activity) {
       )
     }
 
-    if (activity.type === 'sleep' && activity.action === 'end') {
+    if (activity.action === 'end') {
       contentLines.push(
         '时长' + formatDuration(activity.duration)
       )

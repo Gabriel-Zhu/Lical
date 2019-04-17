@@ -10,6 +10,10 @@
         "text": "发现"
       },
       {
+        "pagePath": "pages/notifications/notifications",
+        "text": "通知"
+      },
+      {
         "pagePath": "pages/me/me",
         "text": "我"
       }
@@ -22,7 +26,9 @@
     "pages/discover/discover",
     "pages/me/me",
     "pages/post/post",
-    "pages/locate/locate"
+    "pages/locate/locate",
+    "pages/activity/activity",
+    "pages/notifications/notifications"
   ],
   "window": {
     "backgroundColor": "#FFFFFF",

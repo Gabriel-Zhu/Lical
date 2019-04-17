@@ -77,7 +77,7 @@ const getInitialCards = () => [
 
 Page({
   data: {
-    currentUser: {},
+    isInitializingCard: false,
     cards: [],
     position: null,
   },
@@ -95,10 +95,7 @@ Page({
 
     const { licalUserInfo } = app.globalData
 
-    this.setData({
-      currentUser: licalUserInfo,
-      cards: getInitialCards(),
-    })
+    this.setData({ cards: getInitialCards() })
 
     this.getCards()
   },
@@ -165,11 +162,15 @@ Page({
   },
 
   getPosition() {
+    wx.showLoading({
+      title: '正在获取定位',
+    })
     return new Promise((resolve, reject) => {
       tcMapSDK.reverseGeocoder({
         poi_options: 'policy=4;page_size=1;page_index=1',
         get_poi: '1',
         success: res => {
+          wx.hideLoading()
           this.setData({
             position: res && res.result
               && res.result.pois
@@ -203,7 +204,9 @@ Page({
   },
 
   getCards: function() {
+    this.setData({ isInitializingCard: true })
     this.onGetLastActivity().then(res => {
+      this.setData({ isInitializingCard: false })
       this.getPostButtons(res.result)
     })
   },
@@ -211,6 +214,8 @@ Page({
   getPostButtons: function (lastActivity) {
     const postButtons = []
     const { type: lastType, action: lastAction, is_afternoon } = lastActivity
+
+    const { isInitializingCard, position } = this.data
 
     this.setData({
       cards: getInitialCards().map(card => ({
@@ -222,8 +227,9 @@ Page({
           name: card.type === lastType && lastAction === 'start'
             ? `结束${card.name}`
             : card.button.name,
-          disabled: card.type !== lastType && lastAction === 'start'
-            || card.type === 'travel' && (!this.data.position || !this.data.position.id),
+          disabled: isInitializingCard
+            || card.type !== lastType && lastAction === 'start'
+            || card.type === 'travel' && (!position || !position.id),
         },
       })),
     })

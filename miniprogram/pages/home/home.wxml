@@ -1,4 +1,4 @@
-<import src="../../templates/activity.wxml" />
+<import src="../../templates/activity/item.wxml" />
 
 <view class="page page-home theme-{{ currentUser.theme || 'light' }}">
   <view class="page-header">
@@ -27,7 +27,7 @@
         wx:for-item="activity"
         wx:key="activity._id"
       >
-        <template is="activity" data="{{ activityList, activity, index }}" ></template>
+        <template is="item-activity" data="{{ activityList, activity, index }}" ></template>
       </block>
       <view class="home-module-footer">
         {{ isFetchingActivityList ? '列表加载中' : '仅展示近 30 天动态' }}

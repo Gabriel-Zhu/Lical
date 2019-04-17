@@ -2,12 +2,18 @@
   padding: 16px 0;
 }
 
+.page-post.theme-dark {
+  color: #efefef;
+  background: #2f2f2f;
+}
+
 .page-post .page-header {
   font-size: 16px;
   font-weight: bold;
 }
 
 .page-post .page-card-header {
+  padding-bottom: 0;
   font-size: 16px;
   font-weight: bold;
 }
@@ -18,8 +24,14 @@
 
 .page-card-position {
   flex-direction: row;
+  justify-content: space-between;
   align-items: center;
   padding: 16px;
+}
+
+.page-card-position-left {
+  display: flex;
+  align-items: center;
 }
 
 .page-card-tip {
@@ -27,6 +39,7 @@
   align-items: flex-start;
   line-height: 24px;
   font-size: 14px;
+  color: #888;
 }
 
 .page-card-tip-dot {
@@ -38,7 +51,7 @@
   height: 4px;
   background: #888;
 }
-
+/* 
 .page-card-tip.danger {
   color: #cb4042;
 }
@@ -61,7 +74,7 @@
 
 .page-card-tip.warn .page-card-tip-dot {
   background: #f6c555;
-}
+} */
 
 .page-card-footer {
   display: flex;
@@ -75,9 +88,4 @@
   border-radius: 30px;
   line-height: 30px;
   font-size: 14px;
-}
-
-.page-post.theme-dark {
-  color: #efefef;
-  background: #2f2f2f;
 }

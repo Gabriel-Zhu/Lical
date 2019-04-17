@@ -1,0 +1,63 @@
+<wxs src="./index.wxs" module="tools" />
+
+<template name="page-activity-detail">
+  <view class="page-card page-activity-detail">
+    <view class="page-card-header">
+      <image
+        class="page-activity-detail-avatar"
+        src="{{ activity.user.avatarUrl }}"
+      >
+      </image>
+      <view>
+        <button class="button-link page-activity-detail-user">
+          {{ activity.user.nickName }}
+        </button>
+        <span class="page-activity-detail-user-extra">
+          @{{ activity.lical_id }}
+        </span>
+      </view>
+    </view>
+    <view class="page-card-content">
+      <view
+        wx:for="{{ tools.getActivityContentLines(activity) }}"
+        wx:for-item="activityContentLine"
+        wx:for-index="activityContentLineIndex"
+        wx:key="*this"
+        class="page-activity-detail-content-line"
+      >
+        <icon
+          wx:if="{{ activityContentLineIndex === 0 }}"
+          class="page-activity-detail-content-icon"
+          type="{{ tools.getActivityIconType(activity) }}"
+          size="14"
+        />
+        {{ activityContentLine }}
+      </view>
+      <view class="page-activity-detail-time-and-position">
+        <view class="page-activity-detail-time">
+          {{ activity.json_created_at.dateStr }} · {{ activity.json_created_at.timeStr }} 位于 
+        </view>
+        <button
+          wx:if="{{ activity.position && activity.position.id }}"
+          class="button-link page-activity-detail-position"
+          data-position="{{ activity.position }}"
+          bindtap="handlePositionOpen"
+        >
+          {{ activity.position.ad_info.province }}, {{ activity.position.ad_info.city }}, {{ activity.position.title }}
+        </button>
+      </view>
+    </view>
+    <view class="page-card-footer page-activity-detail-interactions">
+      <button
+        class="button-link{{ activity.isPraised ? '' : ' text-info' }} page-activity-detail-interaction"
+        data-activity="{{ activity }}"
+        bindtap="handlePraiseTap"
+      >
+      {{ activity.isPraised ? '取消': '' }}赞 {{ activity.praisesCount || 0 }}
+      </button>
+      <button class="button-link text-info page-activity-detail-interaction">
+        评论 {{ activity.commentsCount || 0 }}
+      </button>
+    </view>
+  </view>
+</template>

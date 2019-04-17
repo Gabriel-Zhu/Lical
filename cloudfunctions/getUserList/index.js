@@ -8,20 +8,31 @@ const _ = db.command
 
 // 云函数入口函数
 exports.main = async (event, context) => {
-  const { lical_ids, openids } = event
-  const query = {}
+  const {
+    query = {},
+    options: {
+      skip = 0,
+      limit,
+    } = {},
+  } = event
 
-  if (lical_ids) {
-    query.lical_id = _.in(lical_ids)
+  if (Array.isArray(query.lical_id)) {
+    query.lical_id = _.in(query.lical_id)
   }
 
-  if (openids) {
-    query._openid = _.in(openids)
-  }
-
-  const queryListRes = await db.collection('users')
+  let queryListCommand = db.collection('users')
+    .orderBy('createdAt', 'desc')
     .where(query)
-    .get()
+
+  if (skip) {
+    queryListCommand = queryListCommand.skip(skip)
+  }
+
+  if (limit) {
+    queryListCommand = queryListCommand.limit(limit)
+  }
+
+  const queryListRes = await queryListCommand.get()
 
   return {
     list: queryListRes.data,

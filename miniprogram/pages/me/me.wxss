@@ -50,17 +50,8 @@
   border-top: 1px solid #ededed;
 }
 
-.me-setting-item button {
-  margin: 0;
-  padding: 0;
+.me-setting-item .button-link {
   font-size: 16px;
-  color: #888;
-  background: none;
-}
-
-.me-setting-item button:after {
-  border: none;
-  background: none;
 }
 
 .page-me.theme-dark {

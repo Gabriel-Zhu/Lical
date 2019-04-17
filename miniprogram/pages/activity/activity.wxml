@@ -1,0 +1,11 @@
+<import src="../../templates/activity/page.wxml" />
+
+<view class="page page-activity theme-{{ currentUser.theme || 'light' }}">
+  <block wx:if="{{ activity && activity._id }}">
+    <template
+      is="page-activity-detail"
+      data="{{ activity }}"
+    >
+    </template>
+  </block>
+</view>

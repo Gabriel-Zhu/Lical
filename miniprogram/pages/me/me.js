@@ -22,7 +22,6 @@ Page({
         isEverAvailable: true,
       },
     ],
-    currentUser: {},
   },
 
   onShow: function () {
@@ -55,7 +54,6 @@ Page({
         this.setData({
           isEverAvailable,
           authorizeFields: newAuthorizeFields,
-          currentUser: app.globalData.licalUserInfo,
         })
       },
     })
@@ -74,7 +72,7 @@ Page({
       name: 'updateUser',
       data: {
         query: {
-          _id: this.data.currentUser._id,
+          _id: app.globalData.licalUserInfo._id,
         }, 
         body: updateFields,
       },
