@@ -4,21 +4,26 @@ cloud.init()
 const db = cloud.database()
 const _ = db.command
 
-const getActivity = async (event, context) => {
-  const {
-    options: {
-      licalId,
-    } = {},
-    query = {},
-  } = event
-
+const getPureActivity = async (event, context) => {
   const queryListRes = await db.collection('activities')
-    .where(query)
+    .where(event.query)
     .skip(0)
     .limit(1)
     .get()
 
   const activity = queryListRes && queryListRes.data && queryListRes.data[0] || {}
+
+  return activity
+}
+
+const getActivity = async (event, context) => {
+  const {
+    options: {
+      licalId,
+    } = {},
+  } = event
+
+  const activity = await getPureActivity(event, context)
 
   if (licalId && activity._id) {
     const praiseListRes = await db.collection('activity_praises').where({
@@ -38,7 +43,7 @@ const getActivity = async (event, context) => {
   }
 
   if (activity.action === 'end' && activity.related_activity_id) {
-    activity.related_activity = await getActivity({
+    activity.related_activity = await getPureActivity({
       options: { licalId },
       query: { _id: activity.related_activity_id },
     }, context)
@@ -63,5 +68,6 @@ const getActivity = async (event, context) => {
 
   return activity
 }
+
 
 exports.main = getActivity

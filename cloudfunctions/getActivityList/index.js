@@ -20,22 +20,23 @@ exports.main = async (event, context) => {
     query.created_at = _.lt(deadline)
   }
 
-  let finalQuery = null
+  let finalQuery = {
+    ...query,
+    is_invalid: _.neq(true),
+  }
 
   if (completedActivityOnly) {
     finalQuery = _.or([
       {
+        ...finalQuery,
         action: _.neq('start'),
-        ...query,
       },
       {
+        ...finalQuery,
         action: _.eq('start'),
         is_completed: _.in([false, undefined]),
-        ...query,
       },
     ])
-  } else {
-    finalQuery = query
   }
 
   let queryListCommand = db.collection('activities')
