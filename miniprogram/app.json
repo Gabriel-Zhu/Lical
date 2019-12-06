@@ -41,5 +41,6 @@
     "scope.userLocation": {
       "desc": "你的地理位置信息将被用于所有页面的位置展示"
     }
-  }
+  },
+  "sitemapLocation": "sitemap.json"
 }

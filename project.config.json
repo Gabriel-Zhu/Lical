@@ -11,6 +11,8 @@
 	"appid": "wx127c5b7632ced8b0",
 	"projectname": "Lical",
 	"libVersion": "2.6.4",
+	"simulatorType": "wechat",
+	"simulatorPluginLibVersion": {},
 	"condition": {
 		"search": {
 			"current": -1,
